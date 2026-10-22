@@ -292,23 +292,41 @@ def calculate_exposure(
         if value
     }
 
+
+    # Make it so I can search in 6 possible folders where the file may be located. This is a temporary solution until the file structure is finalized.
+    search_folders = [
+        Path(__file__).with_name("local_run_demo_october_20_part_1"),
+        Path(__file__).with_name("local_run_demo_october_20_part_2"),
+        Path(__file__).with_name("local_run_demo_october_20_part_3"),
+        Path(__file__).with_name("local_run_demo_october_20_part_4"),
+        Path(__file__).with_name("local_run_demo_october_20_part_5"),
+        Path(__file__).with_name("local_run_demo_october_20_part_6"),
+        Path(__file__).with_name("local_run_demo_october_20_part_7"),
+        Path(__file__).with_name("local_run_demo_october_20_part_8"),
+    ]
+
+    pattern = f"{bag_id.strip()}_demo_run*"
     matches = sorted(
-        path
-        for path in folder.glob(f"{bag_id.strip()}_demo_run*")
-        if path.is_file()
+        (
+            path
+            for search_folder in search_folders
+            for path in search_folder.glob(pattern)
+            if path.is_file()
+        ),
+        key=str,
     )
 
     if not matches:
         return result(
             "file_not_found",
-            f"No events within application windows were found.",
+            "No events within application windows were found.",
         )
 
     if len(matches) > 1:
         return result(
             "ambiguous_file",
             "More than one file matched this BAG ID.",
-            matching_files=[path.name for path in matches],
+            matching_files=[str(path) for path in matches],
         )
 
     try:
